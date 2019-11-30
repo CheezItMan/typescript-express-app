@@ -1,0 +1,15 @@
+{
+  "name": "express-with-ts",
+  "version": "1.0.0",
+  "description": "A simple Express App with TypeScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "typescript",
+    "express"
+  ],
+  "author": "Chris McAnally",
+  "license": "MIT"
+}
