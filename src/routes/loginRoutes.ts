@@ -1,15 +1,12 @@
-import { Router, NextFunction } from 'express';
-import express, { Request, Response } from 'express';
-import { request } from 'http';
-import { readSync } from 'fs';
+import { Router, Request, Response, NextFunction } from 'express';
 
 interface RequestWithBody extends Request {
-  body: { [key: string]: string | undefined },
-};
+  body: { [key: string]: string | undefined };
+}
 
-const requireAuth = function(req: Request, res: Response, next: NextFunction): void {
+function requireAuth(req: Request, res: Response, next: NextFunction): void {
   if (req.session && req.session.loggedIn) {
-    return next();
+    next();
     return;
   }
 
@@ -17,68 +14,44 @@ const requireAuth = function(req: Request, res: Response, next: NextFunction): v
   res.send('Not permitted');
 }
 
-export const router = Router();
-const UNAUTHORIZED = 401;
-const UNPROCESSABLE_ENTITY = 422;
+const router = Router();
+
+router.post('/auth/login', (req: RequestWithBody, res: Response) => {
+  const { email, password } = req.body;
+
+  if (email && password && email === 'hi@hi.com' && password === 'password') {
+    req.session = { loggedIn: true };
+    res.redirect('/');
+  } else {
+    res.send('Invalid email or password');
+  }
+});
 
 router.get('/', (req: Request, res: Response) => {
   if (req.session && req.session.loggedIn) {
     res.send(`
-    <div>
-      <h2>You are logged in!</h2>
-      <p><a href="/logout">Logout</a></p>
-    </div>
+      <div>
+        <div>You are logged in</div>
+        <a href="/auth/logout">Logout</a>
+      </div>
     `);
-
   } else {
     res.send(`
-    <div>
-      <h1>Heya</h1>
-      <p>Please login with <a href="/login">This link</a></p>
-    </div>
-    `);
-  }
-});
-
-router.post('/login', (req: RequestWithBody, res: Response) => {
-  const { email, password } = req.body;
-
-  if (email && password &&
-    email === 'bob@bob.com' && password === 'password') {
-    req.session = {
-      loggedIn: true,
-    };
-
-    res.redirect('/');
-  } else if (email && password) {
-    res.status(UNAUTHORIZED);
-    res.send(`
-    <div>
-      <h2>Unauthorized</h2>
-    </div>
-    `);
-  }
-  else {
-    res.status(UNPROCESSABLE_ENTITY);
-    res.send(`
-    <div>
-      <h2>You need to submit both an email & body</h2>
-    </div>
+      <div>
+        <div>You are not logged in</div>
+        <a href="/auth/login">Login</a>
+      </div>
     `);
   }
 });
 
 router.get('/logout', (req: Request, res: Response) => {
-  if (req.session) {
-    req.session.loggedIn = false;
-  }
+  req.session = undefined;
   res.redirect('/');
 });
 
 router.get('/protected', requireAuth, (req: Request, res: Response) => {
-  res.send(`
-  <div>
-    <h2>Welcome to protected stuff</h2>
-  </div>
-  `);
+  res.send('Welcome to protected route, logged in user');
 });
+
+export { router };
