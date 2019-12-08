@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+// TODO change keys to capital letters
 var Methods;
 (function (Methods) {
     Methods["get"] = "get";
